@@ -335,7 +335,7 @@ function buildRoom(textures) {
 function buildDoor() {
   const doorMaterial = new THREE.MeshStandardMaterial({ color: 0xc59b69, roughness: 0.72 });
   const trimMaterial = new THREE.MeshStandardMaterial({ color: 0xe4e1da, roughness: 0.88 });
-  const door = addBox(scene, [0.92, 2.12, 0.045], [1.34, 1.06, 1.985], doorMaterial, true, true);
+  addBox(scene, [0.92, 2.12, 0.045], [1.34, 1.06, 1.985], doorMaterial, true, true);
   addBox(scene, [0.08, 2.22, 0.07], [0.84, 1.11, 1.95], trimMaterial);
   addBox(scene, [0.08, 2.22, 0.07], [1.84, 1.11, 1.95], trimMaterial);
   addBox(scene, [1.08, 0.08, 0.07], [1.34, 2.18, 1.95], trimMaterial);
@@ -348,13 +348,6 @@ function buildDoor() {
   handle.castShadow = true;
   scene.add(handle);
 
-  const exitInteraction = {
-    kind: "exit",
-    label: "返回天文收藏夹",
-  };
-  door.userData.interaction = exitInteraction;
-  handle.userData.interaction = exitInteraction;
-  interactables.push(door, handle);
 }
 
 function makeWallControlTexture(kind) {
@@ -2662,10 +2655,6 @@ function activateAt(clientX, clientY) {
   const object = findInteractive(clientX, clientY);
   if (!object) return;
   const interaction = object.userData.interaction;
-  if (interaction.kind === "exit") {
-    window.location.assign("https://betelgeuse-nebula.github.io/astro/");
-    return;
-  }
   if (interaction.kind === "cabinet") {
     cabinetOpen = !cabinetOpen;
     cabinetDoorTargets.forEach((part) => {
