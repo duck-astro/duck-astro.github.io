@@ -46,6 +46,17 @@
         拖动画面环顾 · WASD 前后左右移动
       </div>
 
+      <div id="mobile-controls" class="mobile-controls" aria-label="移动控制">
+        <div class="mobile-controls__row">
+          <button type="button" data-move="w" aria-label="向前移动">W</button>
+        </div>
+        <div class="mobile-controls__row">
+          <button type="button" data-move="a" aria-label="向左移动">A</button>
+          <button type="button" data-move="s" aria-label="向后移动">S</button>
+          <button type="button" data-move="d" aria-label="向右移动">D</button>
+        </div>
+      </div>
+
       <nav class="tour-nav" aria-label="活动室导览点">
         <button id="previous-stop" class="tour-nav__arrow" type="button" aria-label="上一个导览点">‹</button>
         <div id="tour-stops" class="tour-nav__stops">
@@ -71,7 +82,7 @@
           <button id="help-close" class="plain-button" type="button" aria-label="关闭说明">×</button>
         </div>
         <ul>
-          <li>电脑上使用 WASD 前后左右移动；手机仍使用定点导览。</li>
+          <li>电脑上使用 WASD 前后左右移动；手机可用右下角 WASD 按钮移动。</li>
           <li>鼠标或手指拖动画面，可以 360° 环顾。</li>
           <li>下方四个导览按钮可随时把你传送回固定位置。</li>
           <li>发亮的书籍、柜门、海报、器材和大门可以点击。</li>

@@ -295,6 +295,59 @@ button {
   transform: translate(-50%, 0);
 }
 
+.mobile-controls {
+  position: fixed;
+  z-index: 21;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: calc(112px + env(safe-area-inset-bottom));
+  display: none;
+  gap: 4px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(10, 17, 31, 0.68);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px) saturate(140%);
+  touch-action: none;
+}
+
+.mobile-controls__row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.mobile-controls button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(186, 230, 253, 0.3);
+  border-radius: 11px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  touch-action: none;
+  user-select: none;
+}
+
+.mobile-controls button:active,
+.mobile-controls button.is-pressed {
+  color: #06121d;
+  background: linear-gradient(135deg, #bae6fd, #7dd3fc);
+}
+
+.mobile-controls button:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .mobile-controls {
+    display: block;
+  }
+}
+
 .tour-nav {
   position: fixed;
   z-index: 20;

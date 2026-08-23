@@ -23,6 +23,7 @@ const modalTitle = document.querySelector("#modal-title");
 const modalContent = document.querySelector("#modal-content");
 const modalNote = document.querySelector("#modal-note");
 const modalOpen = document.querySelector("#modal-open");
+const mobileMoveButtons = [...document.querySelectorAll("[data-move]")];
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const touchPrimary = window.matchMedia("(pointer: coarse)").matches;
@@ -45,7 +46,7 @@ let cameraTransition = null;
 let cabinetOpen = false;
 let cabinetDoors = [];
 let cabinetDoorTargets = [];
-let dryCabinetOpen = false;
+const dryCabinetStates = [false, false];
 let dryCabinetDoors = [];
 let dryCabinetDoorTargets = [];
 let baseYaw = 0;
@@ -189,7 +190,7 @@ async function start() {
   loading.classList.add("is-hidden");
 
   if (touchPrimary) {
-    showTransientHint("拖动画面环顾，点击下方切换位置", 2700);
+    showTransientHint("拖动画面环顾 · 右下角 WASD 移动", 2700);
   } else {
     showTransientHint("拖动画面环顾 · WASD 前后左右移动", 2700);
   }
@@ -1051,7 +1052,9 @@ function createCustomPierTripod(parent) {
 
   // 三张实物照的共同结构：中央 pier、白色开槽上腿、镀铬伸缩下腿和三向撑杆。
   addCylinder(parent, 0.112, 0.112, 0.64, [0, 0.58, 0], black, 18);
+  // 柱底端的固定抱箍；三脚架的腿部抱箍位于其上方。
   addCylinder(parent, 0.132, 0.132, 0.075, [0, 0.275, 0], dark, 24);
+  addCylinder(parent, 0.145, 0.145, 0.055, [0, 0.405, 0], dark, 24);
   addCylinder(parent, 0.132, 0.132, 0.075, [0, 0.885, 0], dark, 24);
   addCylinder(parent, 0.122, 0.122, 0.055, [0, 0.945, 0], black, 24);
   addBox(parent, [0.235, 0.032, 0.235], [0, 0.982, 0], chrome);
@@ -1074,10 +1077,12 @@ function createCustomPierTripod(parent) {
   for (let i = 0; i < 3; i += 1) {
     const angle = Math.PI / 2 + i * (Math.PI * 2 / 3);
     const radial = (radius, y) => [Math.cos(angle) * radius, y, Math.sin(angle) * radius];
-    const hub = radial(0.12, 0.29);
-    const knee = radial(0.46, 0.145);
-    const foot = radial(0.68, 0.035);
+    // 抬高腿部抱箍并收回脚端，使柱轴与每只脚约成 45°。
+    const hub = radial(0.13, 0.405);
+    const knee = radial(0.34, 0.205);
+    const foot = radial(0.50, 0.035);
 
+    addCylinder(parent, 0.052, 0.052, 0.035, hub, dark, 18);
     addBoxBetween(parent, hub, knee, 0.078, 0.056, white);
     const upperVector = new THREE.Vector3(...knee).sub(new THREE.Vector3(...hub));
     const slotStart = new THREE.Vector3(...hub).addScaledVector(upperVector, 0.22);
@@ -1085,8 +1090,9 @@ function createCustomPierTripod(parent) {
     addBoxBetween(parent, slotStart.toArray(), slotEnd.toArray(), 0.021, 0.058, dark);
 
     addCylinderBetween(parent, knee, foot, 0.023, chrome, 18);
-    addCylinderBetween(parent, radial(0.425, 0.158), radial(0.492, 0.13), 0.034, dark, 18);
-    addCylinderBetween(parent, radial(0.095, 0.26), radial(0.43, 0.135), 0.011, dark, 12);
+    addCylinderBetween(parent, radial(0.31, 0.205), radial(0.38, 0.155), 0.034, dark, 18);
+    // 从柱底端抱箍连接到每只脚中部旋钮：暗色细方柱，而不是圆杆。
+    addBoxBetween(parent, radial(0.115, 0.275), radial(0.34, 0.205), 0.018, 0.018, dark);
 
     const kneeJoint = new THREE.Mesh(new THREE.SphereGeometry(0.043, 18, 12), dark);
     kneeJoint.position.set(...knee);
@@ -1827,6 +1833,7 @@ function buildDryCabinet() {
       frame,
       glass,
       doorWidth,
+      index,
     );
     createDryCabinetDoor(
       group,
@@ -1837,6 +1844,7 @@ function buildDryCabinet() {
       frame,
       glass,
       doorWidth,
+      index,
     );
     addBox(group, [0.18, 0.065, 0.025], [centerX + 0.42, 1.66, -depth / 2 - 0.045], material(0x101b20, {
       emissive: 0x146b79,
@@ -1863,10 +1871,11 @@ function buildDryCabinet() {
   populateDryCabinet(contents);
 }
 
-function createDryCabinetDoor(parent, hingeX, direction, height, depth, frame, glass, doorWidth) {
+function createDryCabinetDoor(parent, hingeX, direction, height, depth, frame, glass, doorWidth, cabinetIndex) {
   const door = new THREE.Group();
   door.position.set(hingeX, 0, -depth / 2 - 0.012);
   door.userData.openDirection = direction;
+  door.userData.cabinetIndex = cabinetIndex;
   parent.add(door);
 
   const centerX = direction * doorWidth / 2;
@@ -1889,7 +1898,8 @@ function createDryCabinetDoor(parent, hingeX, direction, height, depth, frame, g
 
   const interaction = {
     kind: "dry-cabinet",
-    label: "打开防潮柜",
+    cabinetIndex,
+    label: cabinetIndex === 0 ? "打开左侧防潮柜" : "打开右侧防潮柜",
   };
   parts.forEach((part) => {
     part.userData.interaction = interaction;
@@ -1933,15 +1943,6 @@ function populateDryCabinet(cabinet) {
     length: 0.115,
     details: ["彩色冷冻相机 · APS-C", "4952 × 3288 · 4.8 μm", "2 英寸接口 · 约 700 g"],
   });
-  createCooledCamera(cabinet, [-0.49, 1.365, -0.035], {
-    title: "QHY10",
-    bodyColor: 0x1a1e23,
-    accentColor: 0x4a5968,
-    radius: 0.052,
-    length: 0.105,
-    details: ["彩色冷冻相机 · APS 画幅", "3900 × 2616 · 6.05 μm", "2 英寸接口"],
-  });
-
   const planetaryCameras = [
     [0.37, "QHY5III 462C", 0x3430a6, ["彩色行星相机", "1920 × 1080 · 2.9 μm · 135 fps", "1.25 英寸接口"]],
     [0.58, "QHY5III 178M", 0x1578b7, ["黑白行星相机", "3072 × 2048 · 2.4 μm · 50 fps", "1.25 英寸接口；配 IR850 与 UV/IR Cut 滤镜"]],
@@ -2576,11 +2577,32 @@ function bindInterface() {
   window.addEventListener("keydown", handleKeydown);
   window.addEventListener("keyup", handleKeyup);
   window.addEventListener("blur", clearMovementKeys);
+  bindMobileMovementControls();
   helpButton.addEventListener("click", () => toggleHelp(true));
   helpClose.addEventListener("click", () => toggleHelp(false));
   fullscreenButton.addEventListener("click", toggleFullscreen);
   modalBackdrop.addEventListener("click", closeModal);
   modalClose.addEventListener("click", closeModal);
+}
+
+function bindMobileMovementControls() {
+  mobileMoveButtons.forEach((button) => {
+    const key = button.dataset.move;
+    const release = () => {
+      movementKeys.delete(key);
+      button.classList.remove("is-pressed");
+    };
+    button.addEventListener("pointerdown", (event) => {
+      if (modal.classList.contains("is-open") || helpPanel.classList.contains("is-open")) return;
+      event.preventDefault();
+      button.setPointerCapture?.(event.pointerId);
+      movementKeys.add(key);
+      button.classList.add("is-pressed");
+    });
+    button.addEventListener("pointerup", release);
+    button.addEventListener("pointercancel", release);
+    button.addEventListener("lostpointercapture", release);
+  });
 }
 
 function setCameraAtStop(index, immediate = false) {
@@ -2750,11 +2772,15 @@ function activateAt(clientX, clientY) {
     return;
   }
   if (interaction.kind === "dry-cabinet") {
-    dryCabinetOpen = !dryCabinetOpen;
+    const cabinetIndex = interaction.cabinetIndex ?? 0;
+    dryCabinetStates[cabinetIndex] = !dryCabinetStates[cabinetIndex];
+    const isOpen = dryCabinetStates[cabinetIndex];
     dryCabinetDoorTargets.forEach((part) => {
-      part.userData.interaction.label = dryCabinetOpen ? "合上防潮柜" : "打开防潮柜";
+      if (part.userData.interaction.cabinetIndex !== cabinetIndex) return;
+      const sideName = cabinetIndex === 0 ? "左侧防潮柜" : "右侧防潮柜";
+      part.userData.interaction.label = isOpen ? `合上${sideName}` : `打开${sideName}`;
     });
-    showTransientHint(dryCabinetOpen ? "防潮柜已经打开" : "防潮柜已经合上", 1500);
+    showTransientHint(`${cabinetIndex === 0 ? "左侧" : "右侧"}防潮柜已经${isOpen ? "打开" : "合上"}`, 1500);
     clearHover();
     return;
   }
@@ -2839,7 +2865,7 @@ function handleKeydown(event) {
   }
   if (modal.classList.contains("is-open") || helpPanel.classList.contains("is-open")) return;
   const key = event.key.toLowerCase();
-  if (!touchPrimary && ["w", "a", "s", "d"].includes(key)) {
+  if (["w", "a", "s", "d"].includes(key)) {
     movementKeys.add(key);
     event.preventDefault();
     return;
@@ -2902,7 +2928,6 @@ function enterFreeRoamMode() {
 
 function updateMovement(delta) {
   if (
-    touchPrimary ||
     cameraTransition ||
     modal.classList.contains("is-open") ||
     helpPanel.classList.contains("is-open")
@@ -2987,7 +3012,8 @@ function renderFrame() {
   });
 
   dryCabinetDoors.forEach((door) => {
-    const target = dryCabinetOpen ? door.userData.openDirection * (Math.PI / 2) : 0;
+    const isOpen = dryCabinetStates[door.userData.cabinetIndex ?? 0];
+    const target = isOpen ? door.userData.openDirection * (Math.PI / 2) : 0;
     door.rotation.y = THREE.MathUtils.damp(door.rotation.y, target, 7, delta);
   });
 
