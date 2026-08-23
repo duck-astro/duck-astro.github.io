@@ -1930,7 +1930,7 @@ function populateDryCabinet(cabinet) {
     length: 0.115,
     details: ["彩色冷冻相机 · APS-C", "4952 × 3288 · 4.8 μm", "2 英寸接口 · 约 700 g"],
   });
-  createCooledCamera(cabinet, [-0.38, 1.365, -0.035], {
+  createCooledCamera(cabinet, [-0.49, 1.365, -0.035], {
     title: "QHY10",
     bodyColor: 0x1a1e23,
     accentColor: 0x4a5968,
@@ -1940,11 +1940,12 @@ function populateDryCabinet(cabinet) {
   });
 
   const planetaryCameras = [
-    [0.06, "QHY5III 462C", 0x3430a6, ["彩色行星相机", "1920 × 1080 · 2.9 μm · 135 fps", "1.25 英寸接口"]],
-    [0.32, "QHY5III 178M", 0x1578b7, ["黑白行星相机", "3072 × 2048 · 2.4 μm · 50 fps", "1.25 英寸接口；配 IR850 与 UV/IR Cut 滤镜"]],
-    [0.58, "QHY5L-II-M", 0xb8bec2, ["黑白行星/导星相机", "无冷冻 · 1.25 英寸接口", "储存在斑驳金属盒中"]],
-    [0.84, "BOSMA TCE-200", 0x235f88, ["博冠行星相机", "无冷冻 · 1.25 英寸接口", "储存在蓝白纸盒中"]],
-    [1.1, "Celestron NexImage 5", 0xd55a2d, ["行星相机", "无冷冻 · 1.25 英寸接口", "Mini-B 数据接口"]],
+    [0.16, "ZWO ASI585MC", 0x4f6d9a, ["彩色行星/深空相机 · Sony IMX585", "3840 × 2160 · 2.9 μm · 无冷冻", "USB 3.0；1.25 英寸 / 2 英寸接口", "来源：teamf放在天文社的器材"]],
+    [0.37, "QHY5III 462C", 0x3430a6, ["彩色行星相机", "1920 × 1080 · 2.9 μm · 135 fps", "1.25 英寸接口"]],
+    [0.58, "QHY5III 178M", 0x1578b7, ["黑白行星相机", "3072 × 2048 · 2.4 μm · 50 fps", "1.25 英寸接口；配 IR850 与 UV/IR Cut 滤镜"]],
+    [0.79, "QHY5L-II-M", 0xb8bec2, ["黑白行星/导星相机", "无冷冻 · 1.25 英寸接口", "储存在斑驳金属盒中"]],
+    [1.00, "BOSMA TCE-200", 0x235f88, ["博冠行星相机", "无冷冻 · 1.25 英寸接口", "储存在蓝白纸盒中"]],
+    [1.21, "Celestron NexImage 5", 0xd55a2d, ["行星相机", "无冷冻 · 1.25 英寸接口", "Mini-B 数据接口"]],
   ];
   planetaryCameras.forEach(([x, title, color, details], index) => {
     createPlanetaryCamera(cabinet, [x, 1.365, -0.035], {
@@ -2030,34 +2031,43 @@ function createEyepieceCollection(parent) {
     "Coronado 18 mm", "Coronado 12 mm", "未知 28 mm", "SUPER 10",
   ];
   names.forEach((name, index) => {
-    const x = -1.25 + index * (2.5 / (names.length - 1));
+    const x = index < 7 ? -1.18 + index * 0.17 : 0.16 + (index - 7) * 0.17;
     const large = index === 0;
     const height = large ? 0.145 : 0.095 + (index % 3) * 0.012;
     const radius = large ? 0.045 : 0.028;
-    createEyepiece(group, x, 0, height, radius, index < 9 ? 0xf07a28 : 0xc0a24a);
+    createEyepiece(group, x, 0, height, radius, index < 9 ? 0xf07a28 : 0xc0a24a, {
+      title: name,
+      details: ["独立编目目镜", "接口规格按器材编目保留", name.includes("未知") ? "型号未标明，保留原目录名称" : "可单独取用与查看"],
+    });
   });
-  for (const [x, label] of [[-0.28, "3× X-Cel"], [0, "3× Barlow"], [0.28, "2× CEMAX"]]) {
-    createEyepiece(group, x, 0.03, 0.14, 0.022, label.includes("CEMAX") ? 0xc0a24a : 0x718096);
+  for (const [x, label] of [[-0.64, "3× X-Cel"], [-0.31, "3× Barlow"], [0.55, "2× CEMAX"]]) {
+    createEyepiece(group, x, 0.03, 0.14, 0.022, label.includes("CEMAX") ? 0xc0a24a : 0x718096, {
+      title: label,
+      details: ["巴罗夫镜", "倍率与系列名称按器材编目保留", "独立可交互配件"],
+    });
   }
-  registerEquipmentInteraction(group, {
-    title: "目镜与巴罗夫镜",
-    details: ["14 枚目镜：Luminos、X-Cel LX、CEMAX 等", "接口包含 1.25 英寸与 2 英寸", "3 枚巴罗夫镜：3×、3×、2×"],
-    bounds: [2.72, 0.25, 0.34],
-    center: [0, 0.12, 0],
-  });
 }
 
-function createEyepiece(parent, x, z, height, radius, accentColor) {
+function createEyepiece(parent, x, z, height, radius, accentColor, metadata) {
+  const item = new THREE.Group();
+  item.position.set(x, 0, z);
+  parent.add(item);
   const black = material(0x15191e, { metalness: 0.38, roughness: 0.34 });
   const silver = material(0xaeb5b8, { metalness: 0.8, roughness: 0.22 });
   const accent = material(accentColor, { metalness: 0.58, roughness: 0.3 });
-  addCylinder(parent, radius * 0.62, radius * 0.62, height * 0.35, [x, height * 0.175, z], silver, 18);
-  addCylinder(parent, radius, radius * 0.78, height * 0.58, [x, height * 0.64, z], black, 22);
+  addCylinder(item, radius * 0.62, radius * 0.62, height * 0.35, [0, height * 0.175, 0], silver, 18);
+  addCylinder(item, radius, radius * 0.78, height * 0.58, [0, height * 0.64, 0], black, 22);
   const band = new THREE.Mesh(new THREE.TorusGeometry(radius * 0.82, 0.003, 6, 20), accent);
   band.rotation.x = Math.PI / 2;
-  band.position.set(x, height * 0.64, z);
-  parent.add(band);
-  addCylinder(parent, radius * 1.05, radius, height * 0.12, [x, height * 0.95, z], black, 22);
+  band.position.set(0, height * 0.64, 0);
+  item.add(band);
+  addCylinder(item, radius * 1.05, radius, height * 0.12, [0, height * 0.95, 0], black, 22);
+  registerEquipmentInteraction(item, {
+    title: metadata.title,
+    details: metadata.details,
+    bounds: [radius * 3.2, height + 0.04, radius * 3.2],
+    center: [0, height * 0.5, 0],
+  });
 }
 
 function createControllerShelf(parent) {
@@ -2134,25 +2144,35 @@ function createBinocular(parent, position) {
 }
 
 function createPhoneAdapterAndCollimator(parent, position) {
-  const group = new THREE.Group();
-  group.position.set(...position);
-  parent.add(group);
   const black = material(0x171c21, { metalness: 0.4, roughness: 0.38 });
   const orange = material(0xd56e24, { metalness: 0.45, roughness: 0.34 });
-  addBox(group, [0.16, 0.025, 0.07], [0, 0.02, 0], black);
-  addBox(group, [0.035, 0.14, 0.05], [-0.055, 0.085, 0], black);
-  addBox(group, [0.08, 0.035, 0.04], [0.005, 0.14, 0], black);
-  addCylinder(group, 0.028, 0.028, 0.035, [0.065, 0.05, 0], orange, 20);
-  const laser = addCylinder(group, 0.017, 0.017, 0.115, [0.16, 0.075, 0], material(0x3c4a50, {
+  const adapter = new THREE.Group();
+  adapter.position.set(position[0] - 0.08, position[1], position[2]);
+  parent.add(adapter);
+  addBox(adapter, [0.16, 0.025, 0.07], [0, 0.02, 0], black);
+  addBox(adapter, [0.035, 0.14, 0.05], [-0.055, 0.085, 0], black);
+  addBox(adapter, [0.08, 0.035, 0.04], [0.005, 0.14, 0], black);
+  addCylinder(adapter, 0.028, 0.028, 0.035, [0.065, 0.05, 0], orange, 20);
+  registerEquipmentInteraction(adapter, {
+    title: "Celestron NexYZ 三轴手机支架",
+    details: ["三轴手机支架", "可独立从配件柜取出", "手机支架购于 2024 年 12 月"],
+    bounds: [0.25, 0.28, 0.2],
+    center: [0, 0.12, 0],
+  });
+
+  const collimator = new THREE.Group();
+  collimator.position.set(position[0] + 0.13, position[1], position[2]);
+  parent.add(collimator);
+  const laser = addCylinder(collimator, 0.017, 0.017, 0.115, [0, 0.075, 0], material(0x3c4a50, {
     metalness: 0.68,
     roughness: 0.28,
   }), 18);
   laser.rotation.z = Math.PI / 2;
-  registerEquipmentInteraction(group, {
-    title: "三轴手机支架与激光校准器",
-    details: ["Celestron NexYZ 三轴手机支架", "Next Generation Laser Collimator（光轴终结者）", "手机支架购于 2024 年 12 月"],
-    bounds: [0.46, 0.28, 0.2],
-    center: [0.06, 0.12, 0],
+  registerEquipmentInteraction(collimator, {
+    title: "Next Generation Laser Collimator",
+    details: ["激光校准器（光轴终结者）", "独立可交互配件", "用于望远镜光轴校准"],
+    bounds: [0.2, 0.2, 0.2],
+    center: [0, 0.075, 0],
   });
 }
 
@@ -2168,55 +2188,64 @@ function createAdapterShelf(parent) {
     [0.023, 0.007], [0.031, 0.0255], [0.043, 0.006], [0.032, 0.061],
   ];
   adapterSpecs.forEach(([radius, height], index) => {
-    const x = -1.33 + index * 0.13;
-    addCylinder(group, radius, radius, Math.max(height, 0.012), [x, Math.max(height, 0.012) / 2, 0.035], index % 4 === 0 ? silver : black, 20);
+    const x = index < 6 ? -1.16 + index * 0.19 : 0.18 + (index - 6) * 0.19;
+    const item = new THREE.Group();
+    item.position.set(x, 0, 0);
+    group.add(item);
+    const actualHeight = Math.max(height, 0.012);
+    addCylinder(item, radius, radius, actualHeight, [0, actualHeight / 2, 0.035], index % 4 === 0 ? silver : black, 20);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(radius * 0.78, 0.003, 6, 18), silver);
     ring.rotation.x = Math.PI / 2;
-    ring.position.set(x, Math.max(height, 0.012) + 0.002, 0.035);
-    group.add(ring);
-  });
-  registerEquipmentInteraction(group, {
-    title: "延长筒与转接环",
-    details: ["2 英寸延长筒：73 / 55 / 47 mm", "T-Adapter 与多种 M42、M36、M25、M51 转接环", "含大转小、小转大及 Takahashi CA-35 残件"],
-    bounds: [1.75, 0.18, 0.24],
-    center: [-0.62, 0.09, 0.035],
+    ring.position.set(0, actualHeight + 0.002, 0.035);
+    item.add(ring);
+    registerEquipmentInteraction(item, {
+      title: `转接件 ${String(index + 1).padStart(2, "0")}`,
+      details: [`外径约 ${Math.round(radius * 2000)} mm`, `高度约 ${Math.round(height * 1000)} mm`, "型号未明，按器材编目尺寸保留"],
+      bounds: [Math.max(radius * 3, 0.08), Math.max(actualHeight + 0.04, 0.08), Math.max(radius * 3, 0.08)],
+      center: [0, actualHeight * 0.5, 0.035],
+    });
   });
 
   const diagonals = new THREE.Group();
-  diagonals.position.set(0.38, 0, 0.02);
+  diagonals.position.set(0, 0, 0.02);
   group.add(diagonals);
   for (let i = 0; i < 5; i += 1) {
-    const x = i * 0.17;
-    addBox(diagonals, [0.07, 0.06, 0.07], [x, 0.04, 0], black);
-    addCylinder(diagonals, 0.022, 0.022, 0.075, [x, 0.105, 0], indexMaterial(i, black, silver), 18);
-    addAxialCylinder(diagonals, 0.022, 0.026, 0.07, [x + 0.06, 0.04, 0], indexMaterial(i + 1, black, silver), "x", 18);
+    const x = 0.18 + i * 0.20;
+    const item = new THREE.Group();
+    item.position.set(x, 0, 0);
+    diagonals.add(item);
+    addBox(item, [0.07, 0.06, 0.07], [0, 0.04, 0], black);
+    addCylinder(item, 0.022, 0.022, 0.075, [0, 0.105, 0], indexMaterial(i, black, silver), 18);
+    addAxialCylinder(item, 0.022, 0.026, 0.07, [0.06, 0.04, 0], indexMaterial(i + 1, black, silver), "x", 18);
+    registerEquipmentInteraction(item, {
+      title: `天顶镜 ${i + 1}`,
+      details: ["无标签 2 英寸与 1.25 英寸天顶镜", "具体型号按器材编目与实物保留", "独立可交互配件"],
+      bounds: [0.18, 0.23, 0.2],
+      center: [0.03, 0.09, 0],
+    });
   }
-  registerEquipmentInteraction(diagonals, {
-    title: "天顶镜（5 件）",
-    details: ["无标签 2 英寸与 1.25 英寸天顶镜", "Celestron 1.25 英寸、MEADE 2 英寸", "SolarMax 1.25 英寸滤光天顶镜"],
-    bounds: [0.86, 0.23, 0.2],
-    center: [0.34, 0.11, 0],
-  });
 
   const masks = new THREE.Group();
-  masks.position.set(1.13, 0.12, 0.03);
+  masks.position.set(0, 0.12, 0.03);
   group.add(masks);
   const maskSizes = [0.065, 0.052, 0.042, 0.035];
   maskSizes.forEach((radius, index) => {
-    const x = (index - 1.5) * 0.12;
+    const x = 0.75 + index * 0.14;
+    const item = new THREE.Group();
+    item.position.set(x, 0, 0);
+    masks.add(item);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.006, 6, 24), index % 2 ? silver : black);
-    ring.position.set(x, 0, 0);
-    masks.add(ring);
+    item.add(ring);
     for (const angle of [0, Math.PI / 3, -Math.PI / 3]) {
-      const spoke = addBox(masks, [radius * 1.7, 0.004, 0.004], [x, 0, 0], index % 2 ? silver : black, false, false);
+      const spoke = addBox(item, [radius * 1.7, 0.004, 0.004], [0, 0, 0], index % 2 ? silver : black, false, false);
       spoke.rotation.z = angle;
     }
-  });
-  registerEquipmentInteraction(masks, {
-    title: "鱼骨板（4 件）",
-    details: ["金属约 φ200 mm、φ140 mm、φ80 mm", "另有约 φ100 mm 亚克力件", "用于望远镜精确合焦"],
-    bounds: [0.54, 0.22, 0.14],
-    center: [0, 0, 0],
+    registerEquipmentInteraction(item, {
+      title: `鱼骨板 ${index + 1}`,
+      details: [`金属约 φ${[200, 140, 80, 100][index]} mm`, index === 3 ? "亚克力件" : "金属件", "用于望远镜精确合焦"],
+      bounds: [radius * 2.4, 0.12, radius * 2.4],
+      center: [0, 0, 0],
+    });
   });
 }
 
@@ -2232,32 +2261,55 @@ function createStorageShelf(parent) {
   const dark = material(0x242b31, { roughness: 0.56, metalness: 0.25 });
   const silver = material(0xc7cccb, { metalness: 0.64, roughness: 0.28 });
   for (let i = 0; i < 4; i += 1) {
-    addBox(group, [0.32, 0.13 + (i % 2) * 0.035, 0.25], [-1.25 + i * 0.37, 0.07, 0], i % 2 ? dark : cardboard);
+    const item = new THREE.Group();
+    const x = -1.18 + i * 0.27;
+    const boxHeight = 0.13 + (i % 2) * 0.035;
+    item.position.set(x, 0.07, 0);
+    group.add(item);
+    addBox(item, [0.23, boxHeight, 0.22], [0, 0, 0], i % 2 ? dark : cardboard);
+    registerEquipmentInteraction(item, {
+      title: `盒装配件 ${i + 1}`,
+      details: ["器材编目中的电源、线材或小配件收纳盒", "具体内容以现场盒内物品为准", "左侧防潮柜独立物品"],
+      bounds: [0.28, boxHeight + 0.04, 0.27],
+      center: [0, 0, 0],
+    });
   }
   for (let i = 0; i < 5; i += 1) {
-    addBox(group, [0.18, 0.095, 0.16], [0.25 + i * 0.22, 0.055, 0], i % 2 ? cardboard : dark);
-    addAxialCylinder(group, 0.012, 0.012, 0.05, [0.25 + i * 0.22, 0.115, -0.08], silver, "z", 12);
+    const item = new THREE.Group();
+    const x = 0.22 + i * 0.21;
+    item.position.set(x, 0.055, 0);
+    group.add(item);
+    addBox(item, [0.17, 0.095, 0.16], [0, 0, 0], i % 2 ? cardboard : dark);
+    addAxialCylinder(item, 0.012, 0.012, 0.05, [0, 0.06, -0.08], silver, "z", 12);
+    registerEquipmentInteraction(item, {
+      title: `盒装配件 ${i + 5}`,
+      details: ["小型天文配件收纳盒", "可能包含 USB 线、供电线或转接件", "右侧防潮柜独立物品"],
+      bounds: [0.22, 0.16, 0.21],
+      center: [0, 0, 0],
+    });
   }
   const filterGroup = new THREE.Group();
-  filterGroup.position.set(1.14, 0.22, 0.03);
+  filterGroup.position.set(0, 0.22, 0.03);
   group.add(filterGroup);
-  for (const [x, radius] of [[-0.1, 0.1], [0.11, 0.075]]) {
+  for (const [x, radius, index] of [[0.92, 0.1, 1], [1.15, 0.075, 2]]) {
+    const item = new THREE.Group();
+    item.position.x = x;
+    filterGroup.add(item);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.014, 8, 28), dark);
-    ring.position.x = x;
-    filterGroup.add(ring);
+    item.add(ring);
     const film = new THREE.Mesh(
       new THREE.CircleGeometry(radius * 0.82, 28),
       material(0xcfd7d9, { metalness: 0.38, roughness: 0.18, side: THREE.DoubleSide }),
     );
-    film.position.set(x, 0, -0.002);
-    filterGroup.add(film);
+    film.position.set(0, 0, -0.002);
+    item.add(film);
+    registerEquipmentInteraction(item, {
+      title: `巴德膜 ${index}`,
+      details: [index === 1 ? "C8 原装巴德膜" : "C6 原装巴德膜", `直径约 ${Math.round(radius * 2000)} mm`, "独立可交互配件"],
+      bounds: [radius * 2.2, 0.12, radius * 2.2],
+      center: [0, 0, 0],
+    });
   }
-  registerEquipmentInteraction(group, {
-    title: "供电、线材、盒装配件与巴德膜",
-    details: ["12 V 5 A / 3 A 电源适配器、USB 数据线与可调电压线", "C8 与 C6 原装巴德膜", "相机、滤镜和小配件按原储存盒归类"],
-    bounds: [2.82, 0.42, 0.38],
-    center: [0, 0.2, 0],
-  });
 }
 
 function buildPosters(textures) {
