@@ -1856,6 +1856,9 @@ function buildDryCabinet() {
 
   const contents = new THREE.Group();
   contents.scale.x = 0.84;
+  // 搁板前缘约在 z=-0.19、背板约在 z=+0.22；把所有可交互物品
+  // 统一放在前侧安全区，避免较宽的仪器贴住背板或穿入框架。
+  contents.position.z = -0.115;
   group.add(contents);
   populateDryCabinet(contents);
 }
