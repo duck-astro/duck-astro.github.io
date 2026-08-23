@@ -1044,6 +1044,7 @@ function createTripod(parent, {
 }
 
 function createCustomPierTripod(parent) {
+  const firstChildIndex = parent.children.length;
   const black = material(0x171b20, { metalness: 0.56, roughness: 0.34 });
   const dark = material(0x242a30, { metalness: 0.48, roughness: 0.4 });
   const white = material(0xe8e7e1, { metalness: 0.28, roughness: 0.38 });
@@ -1051,15 +1052,16 @@ function createCustomPierTripod(parent) {
   const rubber = material(0x111519, { metalness: 0.08, roughness: 0.82 });
 
   // 三张实物照的共同结构：中央 pier、白色开槽上腿、镀铬伸缩下腿和三向撑杆。
-  addCylinder(parent, 0.112, 0.112, 0.64, [0, 0.58, 0], black, 18);
+  // 柱底端保持在原处（底面约 26 cm），向上增加 20 cm；脚端因此完全不动。
+  addCylinder(parent, 0.112, 0.112, 0.84, [0, 0.68, 0], black, 18);
   // 柱底端的固定抱箍；三脚架的腿部抱箍位于其上方。
   addCylinder(parent, 0.132, 0.132, 0.075, [0, 0.275, 0], dark, 24);
-  addCylinder(parent, 0.145, 0.145, 0.055, [0, 0.405, 0], dark, 24);
-  addCylinder(parent, 0.132, 0.132, 0.075, [0, 0.885, 0], dark, 24);
-  addCylinder(parent, 0.122, 0.122, 0.055, [0, 0.945, 0], black, 24);
-  addBox(parent, [0.235, 0.032, 0.235], [0, 0.982, 0], chrome);
+  addCylinder(parent, 0.145, 0.145, 0.055, [0, 0.563, 0], dark, 24);
+  addCylinder(parent, 0.132, 0.132, 0.075, [0, 0.985, 0], dark, 24);
+  addCylinder(parent, 0.122, 0.122, 0.055, [0, 1.045, 0], black, 24);
+  addBox(parent, [0.235, 0.032, 0.235], [0, 1.082, 0], chrome);
 
-  for (const y of [0.39, 0.55, 0.71]) {
+  for (const y of [0.39, 0.60, 0.81]) {
     for (const angle of [0, Math.PI / 2]) {
       addAxialCylinder(
         parent,
@@ -1077,9 +1079,9 @@ function createCustomPierTripod(parent) {
   for (let i = 0; i < 3; i += 1) {
     const angle = Math.PI / 2 + i * (Math.PI * 2 / 3);
     const radial = (radius, y) => [Math.cos(angle) * radius, y, Math.sin(angle) * radius];
-    // 抬高腿部抱箍并收回脚端，使柱轴与每只脚约成 45°。
-    const hub = radial(0.13, 0.405);
-    const knee = radial(0.34, 0.205);
+    // 脚端固定在原地，腿轴线与地板改为约 55°；上下两段仍保持原来的长度比。
+    const hub = radial(0.13, 0.563);
+    const knee = radial(0.335, 0.270);
     const foot = radial(0.50, 0.035);
 
     addCylinder(parent, 0.052, 0.052, 0.035, hub, dark, 18);
@@ -1090,9 +1092,9 @@ function createCustomPierTripod(parent) {
     addBoxBetween(parent, slotStart.toArray(), slotEnd.toArray(), 0.021, 0.058, dark);
 
     addCylinderBetween(parent, knee, foot, 0.023, chrome, 18);
-    addCylinderBetween(parent, radial(0.31, 0.205), radial(0.38, 0.155), 0.034, dark, 18);
+    addCylinderBetween(parent, radial(0.305, 0.270), radial(0.375, 0.215), 0.034, dark, 18);
     // 从柱底端抱箍连接到每只脚中部旋钮：暗色细方柱，而不是圆杆。
-    addBoxBetween(parent, radial(0.115, 0.275), radial(0.34, 0.205), 0.018, 0.018, dark);
+    addBoxBetween(parent, radial(0.115, 0.275), radial(0.335, 0.270), 0.018, 0.018, dark);
 
     const kneeJoint = new THREE.Mesh(new THREE.SphereGeometry(0.043, 18, 12), dark);
     kneeJoint.position.set(...knee);
@@ -1101,6 +1103,8 @@ function createCustomPierTripod(parent) {
     addCylinder(parent, 0.052, 0.052, 0.025, foot, rubber, 20);
     addBox(parent, [0.1, 0.025, 0.065], [foot[0], 0.018, foot[2]], rubber);
   }
+
+  return parent.children.slice(firstChildIndex);
 }
 
 function buildEquipmentGallery() {
@@ -1219,7 +1223,10 @@ function createCem40RefractorStationLegacy() {
   const carbon = material(0x1e2428, { metalness: 0.3, roughness: 0.25 });
   const lens = material(0x174a66, { metalness: 0.18, roughness: 0.06 });
 
-  createCustomPierTripod(group);
+  const tripodGroup = new THREE.Group();
+  tripodGroup.name = "CEM40 定制三脚架（55°）";
+  group.add(tripodGroup);
+  createCustomPierTripod(tripodGroup);
 
   // CEM40 的 125 mm 底座与中心平衡赤道仪主体；红黑比例依据实物照片复原。
   addCylinder(group, 0.125, 0.125, 0.065, [0, 1.03, 0], black, 30);
@@ -1329,7 +1336,10 @@ function createCem40RefractorStation() {
   const carbon = material(0x171c20, { metalness: 0.38, roughness: 0.22 });
   const lens = material(0x173e57, { metalness: 0.16, roughness: 0.06 });
 
-  createCustomPierTripod(group);
+  const tripodGroup = new THREE.Group();
+  tripodGroup.name = "CEM40 定制三脚架（55°）";
+  group.add(tripodGroup);
+  createCustomPierTripod(tripodGroup);
   addCylinder(group, 0.125, 0.125, 0.06, [0, 1.03, 0], black, 32);
   addCylinder(group, 0.113, 0.12, 0.07, [0, 1.095, 0], redDark, 30);
 
@@ -1433,6 +1443,12 @@ function createCem40RefractorStation() {
     note: "轴系与零位依据 iOptron CEM40 官方 Quick Start Guide；镜筒参数依据社团器材编目",
     bounds: [1.48, 1.9, 1.28],
     center: [0, 0.96, 0],
+  });
+
+  // 柱脚、下抱箍和地面接触点不动；赤道仪、镜筒及其标牌整体抬高 10 cm，
+  // 正好落在加高后的柱顶上。
+  group.children.forEach((child) => {
+    if (child !== tripodGroup) child.position.y += 0.1;
   });
 }
 
@@ -1958,7 +1974,8 @@ function populateDryCabinet(cabinet) {
       details,
     });
   });
-  createASI585MC(cabinet, [0.16, 1.365, -0.035]);
+  // 移到右侧柜体的安全位置，远离中间立柱和后背板，避免穿模。
+  createASI585MC(cabinet, [0.34, 1.365, -0.075]);
 
   createEyepieceCollection(cabinet);
   createControllerShelf(cabinet);
@@ -1979,15 +1996,26 @@ function createASI585MC(parent, position) {
   const radius = 0.031;
   const height = 0.0314;
   addCylinder(group, radius, radius, height, [0, height / 2, 0], red, 32);
+  const redBand = new THREE.Mesh(new THREE.TorusGeometry(radius * 1.006, 0.0018, 8, 32), red);
+  redBand.rotation.x = Math.PI / 2;
+  redBand.position.y = height * 0.53;
+  group.add(redBand);
   addCylinder(group, radius * 1.02, radius * 1.02, 0.0035, [0, 0.00175, 0], black, 32);
   addCylinder(group, radius * 1.01, radius * 1.01, 0.0035, [0, height - 0.00175, 0], black, 32);
+  // 顶部黑色螺纹接口、内凹的感光窗和四枚固定螺钉。
+  addCylinder(group, radius * 0.78, radius * 0.78, 0.010, [0, height + 0.0065, 0], black, 28);
+  addCylinder(group, radius * 0.52, radius * 0.52, 0.002, [0, height + 0.0125, 0], glass, 28);
   addCylinder(group, radius * 0.68, radius * 0.68, 0.002, [0, height + 0.001, 0], glass, 28);
   for (const angle of [Math.PI / 4, (3 * Math.PI) / 4, (5 * Math.PI) / 4, (7 * Math.PI) / 4]) {
     addCylinder(group, 0.0023, 0.0023, 0.0015, [Math.cos(angle) * 0.020, height + 0.0022, Math.sin(angle) * 0.020], silver, 12);
   }
   addBox(group, [0.004, 0.014, 0.018], [radius + 0.001, height * 0.48, 0], black, false, false);
+  addBox(group, [0.004, 0.009, 0.015], [radius + 0.001, height * 0.72, 0], black, false, false);
   addBox(group, [0.005, 0.005, 0.009], [radius + 0.003, height * 0.60, -0.004], silver, false, false);
   addBox(group, [0.005, 0.004, 0.008], [radius + 0.003, height * 0.37, 0.004], silver, false, false);
+  // 后侧的 USB/电源接口，用小型银色插口区分 ASI585MC 与普通行星相机。
+  addBox(group, [0.006, 0.006, 0.012], [-radius - 0.002, height * 0.58, -0.006], silver, false, false);
+  addBox(group, [0.006, 0.006, 0.009], [-radius - 0.002, height * 0.39, 0.006], silver, false, false);
   registerEquipmentInteraction(group, {
     title: "ZWO ASI585MC",
     details: ["红色彩色行星/深空相机 · Sony IMX585", "机身约 Ø62 mm × 31.4 mm", "3840 × 2160 · 2.9 μm · USB 3.0", "来源：teamf放在天文社的器材"],
