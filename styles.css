@@ -233,7 +233,7 @@ button {
 .scene-label {
   position: fixed;
   z-index: 15;
-  left: max(20px, env(safe-area-inset-left));
+  right: max(20px, env(safe-area-inset-right));
   bottom: calc(112px + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
@@ -298,7 +298,7 @@ button {
 .mobile-controls {
   position: fixed;
   z-index: 21;
-  right: max(14px, env(safe-area-inset-right));
+  left: max(14px, env(safe-area-inset-left));
   bottom: calc(112px + env(safe-area-inset-bottom));
   display: block;
   gap: 4px;
@@ -677,7 +677,7 @@ button {
   .scene-label {
     right: max(12px, env(safe-area-inset-right));
     bottom: calc(98px + env(safe-area-inset-bottom));
-    left: max(12px, env(safe-area-inset-left));
+    left: auto;
     max-width: none;
     padding: 9px 12px;
   }
