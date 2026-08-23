@@ -1940,7 +1940,6 @@ function populateDryCabinet(cabinet) {
   });
 
   const planetaryCameras = [
-    [0.16, "ZWO ASI585MC", 0x4f6d9a, ["彩色行星/深空相机 · Sony IMX585", "3840 × 2160 · 2.9 μm · 无冷冻", "USB 3.0；1.25 英寸 / 2 英寸接口", "来源：teamf放在天文社的器材"]],
     [0.37, "QHY5III 462C", 0x3430a6, ["彩色行星相机", "1920 × 1080 · 2.9 μm · 135 fps", "1.25 英寸接口"]],
     [0.58, "QHY5III 178M", 0x1578b7, ["黑白行星相机", "3072 × 2048 · 2.4 μm · 50 fps", "1.25 英寸接口；配 IR850 与 UV/IR Cut 滤镜"]],
     [0.79, "QHY5L-II-M", 0xb8bec2, ["黑白行星/导星相机", "无冷冻 · 1.25 英寸接口", "储存在斑驳金属盒中"]],
@@ -1955,11 +1954,42 @@ function populateDryCabinet(cabinet) {
       details,
     });
   });
+  createASI585MC(cabinet, [0.16, 1.365, -0.035]);
 
   createEyepieceCollection(cabinet);
   createControllerShelf(cabinet);
   createAdapterShelf(cabinet);
   createStorageShelf(cabinet);
+}
+
+function createASI585MC(parent, position) {
+  const group = new THREE.Group();
+  group.position.set(...position);
+  parent.add(group);
+  // 原版 ASI585MC 是短筒形红色机身，而不是细长的普通行星相机外壳。
+  // 依据 ZWO ASI585MC 手册：机身约 Ø62 mm × 31.4 mm。
+  const red = material(0xb52d3c, { metalness: 0.62, roughness: 0.27 });
+  const black = material(0x161b20, { metalness: 0.48, roughness: 0.32 });
+  const silver = material(0xbfc6c8, { metalness: 0.82, roughness: 0.2 });
+  const glass = material(0x173b55, { metalness: 0.32, roughness: 0.08 });
+  const radius = 0.031;
+  const height = 0.0314;
+  addCylinder(group, radius, radius, height, [0, height / 2, 0], red, 32);
+  addCylinder(group, radius * 1.02, radius * 1.02, 0.0035, [0, 0.00175, 0], black, 32);
+  addCylinder(group, radius * 1.01, radius * 1.01, 0.0035, [0, height - 0.00175, 0], black, 32);
+  addCylinder(group, radius * 0.68, radius * 0.68, 0.002, [0, height + 0.001, 0], glass, 28);
+  for (const angle of [Math.PI / 4, (3 * Math.PI) / 4, (5 * Math.PI) / 4, (7 * Math.PI) / 4]) {
+    addCylinder(group, 0.0023, 0.0023, 0.0015, [Math.cos(angle) * 0.020, height + 0.0022, Math.sin(angle) * 0.020], silver, 12);
+  }
+  addBox(group, [0.004, 0.014, 0.018], [radius + 0.001, height * 0.48, 0], black, false, false);
+  addBox(group, [0.005, 0.005, 0.009], [radius + 0.003, height * 0.60, -0.004], silver, false, false);
+  addBox(group, [0.005, 0.004, 0.008], [radius + 0.003, height * 0.37, 0.004], silver, false, false);
+  registerEquipmentInteraction(group, {
+    title: "ZWO ASI585MC",
+    details: ["红色彩色行星/深空相机 · Sony IMX585", "机身约 Ø62 mm × 31.4 mm", "3840 × 2160 · 2.9 μm · USB 3.0", "来源：teamf放在天文社的器材"],
+    bounds: [0.09, 0.10, 0.09],
+    center: [0, height * 0.52, 0],
+  });
 }
 
 function createCooledCamera(parent, position, {
