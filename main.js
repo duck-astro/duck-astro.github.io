@@ -63,6 +63,8 @@ let hintTimer;
 let freeRoaming = false;
 let roomLights = [];
 let roomLightsOn = true;
+let ceilingLightMaterial;
+let dimmableSurfaceMaterials = [];
 
 const movementKeys = new Set();
 const movementForward = new THREE.Vector3();
@@ -272,7 +274,33 @@ function buildLights() {
   }
 }
 
+function registerDimmableSurfaceMaterial(surfaceMaterial) {
+  dimmableSurfaceMaterials.push({
+    material: surfaceMaterial,
+    baseColor: surfaceMaterial.color.clone(),
+  });
+  return surfaceMaterial;
+}
+
+function setRoomLighting(enabled) {
+  const factor = enabled ? 1 : 0.1;
+  roomLights.forEach(({ light, intensity }) => {
+    light.intensity = intensity * factor;
+  });
+
+  if (ceilingLightMaterial) {
+    ceilingLightMaterial.color.setHex(enabled ? 0xffffff : palette.ceiling);
+    ceilingLightMaterial.emissive.setHex(enabled ? 0xeaf4ff : 0x000000);
+    ceilingLightMaterial.emissiveIntensity = enabled ? 2.2 : 0;
+  }
+
+  dimmableSurfaceMaterials.forEach(({ material: surfaceMaterial, baseColor }) => {
+    surfaceMaterial.color.copy(baseColor).multiplyScalar(factor);
+  });
+}
+
 function buildRoom(textures) {
+  dimmableSurfaceMaterials = [];
   const wallMaterial = new THREE.MeshStandardMaterial({ color: palette.wall, roughness: 0.94 });
   const ceilingMaterial = new THREE.MeshStandardMaterial({ color: palette.ceiling, roughness: 0.9 });
   const floorTexture = makeFloorTexture();
@@ -324,6 +352,7 @@ function buildRoom(textures) {
     emissiveIntensity: 2.2,
     roughness: 0.25,
   });
+  ceilingLightMaterial = lightMaterial;
   addBox(scene, [1.18, 0.025, 0.54], [-0.65, 2.982, -0.55], lightMaterial, false, false);
   addBox(scene, [1.18, 0.025, 0.54], [0.8, 2.982, 0.7], lightMaterial, false, false);
   for (const x of [3.4, 5.9, 8.4]) {
@@ -445,10 +474,10 @@ function buildWallControls(textures) {
     housing.castShadow = true;
     control.add(housing);
 
-    const face = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.096, 0.096),
+    const faceMaterial = registerDimmableSurfaceMaterial(
       new THREE.MeshBasicMaterial({ map: makeWallControlTexture(kind), side: THREE.DoubleSide }),
     );
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(0.096, 0.096), faceMaterial);
     face.position.z = -0.011;
     face.rotation.y = Math.PI;
     if (kind === "switch") {
@@ -461,8 +490,7 @@ function buildWallControls(textures) {
     control.add(face);
 
     if (kind === "switch") {
-      const sticker = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.074, 0.082),
+      const stickerMaterial = registerDimmableSurfaceMaterial(
         new THREE.MeshBasicMaterial({
           map: textures.yuiSticker,
           transparent: true,
@@ -470,6 +498,10 @@ function buildWallControls(textures) {
           depthWrite: false,
           side: THREE.DoubleSide,
         }),
+      );
+      const sticker = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.074, 0.082),
+        stickerMaterial,
       );
       sticker.position.set(-0.004, 0, -0.0123);
       sticker.rotation.y = Math.PI;
@@ -483,7 +515,9 @@ function buildWallControls(textures) {
 
 function buildWallOutlets() {
   const housingMaterial = material(0xf2f1eb, { roughness: 0.72 });
-  const faceMaterial = new THREE.MeshBasicMaterial({ map: makeWallSocketTexture(), side: THREE.DoubleSide });
+  const faceMaterial = registerDimmableSurfaceMaterial(
+    new THREE.MeshBasicMaterial({ map: makeWallSocketTexture(), side: THREE.DoubleSide }),
+  );
   for (const x of [-0.95, -0.85]) {
     const outlet = new THREE.Group();
     outlet.position.set(x, 0.2, 1.957);
@@ -2913,10 +2947,7 @@ function activateAt(clientX, clientY) {
   }
   if (interaction.kind === "light-switch") {
     roomLightsOn = !roomLightsOn;
-    const factor = roomLightsOn ? 1 : 0.1;
-    roomLights.forEach(({ light, intensity }) => {
-      light.intensity = intensity * factor;
-    });
+    setRoomLighting(roomLightsOn);
     interaction.label = roomLightsOn ? "关灯" : "开灯";
     showTransientHint(roomLightsOn ? "灯已打开" : "灯已关闭", 1500);
     clearHover();
