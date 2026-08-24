@@ -190,7 +190,7 @@ async function start() {
   loading.classList.add("is-hidden");
 
   if (touchPrimary) {
-    showTransientHint("拖动画面环顾 · 右下角 WASD 移动", 2700);
+    showTransientHint("拖动画面环顾 · 左下角 WASD 移动", 2700);
   } else {
     showTransientHint("拖动画面环顾 · WASD 前后左右移动", 2700);
   }
@@ -1440,7 +1440,10 @@ function createCem40RefractorStation() {
   registerEquipmentInteraction(group, {
     title: "锐星 CF-90 II APO + iOptron CEM40",
     details: ["折射式 APO · 口径 90 mm · 焦距 600 mm · f/6.7", "CEM40 中心平衡结构；极轴仰角设为珠海纬度约 22°", "零位：镜筒在上并平行极轴指向北天极，重锤杆沿 DEC 轴向下", "定制 pier tripod：黑色中央立柱、白色开槽上腿、银色金属伸缩下腿"],
-    note: "轴系与零位依据 iOptron CEM40 官方 Quick Start Guide；镜筒参数依据社团器材编目",
+    note: "CEM40 参数依据 iOptron 官方规格；镜筒参数依据社团器材编目；零位与 22° 仰角按本活动室设定复原",
+    sources: [
+      ["iOptron CEM40 官方规格", "https://www.ioptron.com/v/Manuals/7400_CEM40_SpecComparison.pdf"],
+    ],
     bounds: [1.48, 1.9, 1.28],
     center: [0, 0.96, 0],
   });
@@ -1520,7 +1523,7 @@ function createSolarMaxStation() {
   createEquipmentPlaque(group, "SolarMax II 90", "Hα 90/800 mm · 箱内陈列", [0, 0.18, 0.24], 0.64);
   registerEquipmentInteraction(group, {
     title: "Coronado SolarMax II 90",
-    details: ["Hα 日珥镜 · 口径 90 mm · 焦距 800 mm · f/8.9", "1.25 英寸接口 · 镜筒长度约 76 cm", "箱内配 25/18/12 mm 目镜及 2× 巴罗夫镜", "CEM40 已用于锐星，因此本镜筒按收纳状态放在打开的泡棉硬箱中"],
+    details: ["Hα 日珥镜 · 口径 90 mm · 焦距 800 mm · f/8.9", "1.25 英寸接口", "箱内配 25/18/12 mm 目镜及 2× 巴罗夫镜", "CEM40 已用于锐星，因此本镜筒按收纳状态放在打开的泡棉硬箱中"],
     note: "箱体外观参考 SolarMax II 90 常见黑色定制泡棉硬箱",
     bounds: [1.08, 0.62, 0.7],
     center: [0, 0.31, -0.08],
@@ -1621,11 +1624,11 @@ function createNewtonianDisplayLegacy() {
   addAxialCylinder(tubeAssembly, 0.025, 0.029, 0.08, [0.16, tubeY + 0.18, 0], black, "y", 20);
   addAxialCylinder(tubeAssembly, 0.017, 0.017, 0.15, [-0.08, tubeY + 0.14, 0], white, "x", 18);
   addBox(tubeAssembly, [0.15, 0.018, 0.025], [-0.08, tubeY + 0.11, 0], white);
-  createEquipmentPlaque(group, "Sky-Watcher 150PDS", "牛反 150/750 mm", [0, 0.18, 0.34], 0.66);
+  createEquipmentPlaque(group, "小黑", "牛反 150/750 mm", [0, 0.18, 0.34], 0.66);
   registerEquipmentInteraction(group, {
-    title: "Sky-Watcher 150PDS",
-    details: ["抛物面牛顿反射式", "口径 150 mm · 焦距 750 mm · f/5", "镜筒 182 × 690 mm · 约 6 kg · 2 英寸双速调焦座", "配套 German equatorial mount 与金属三脚架；器材编目未记录赤道仪具体型号"],
-    note: "镜筒按实物图与参数复原；配套赤道仪因型号未明，按常见 Sky-Watcher EQ 外形制作",
+    title: "小黑",
+    details: ["抛物面牛顿反射式", "口径 150 mm · 焦距 750 mm · f/5", "镜筒 182 × 690 mm · 约 6 kg · 2 英寸双速调焦座"],
+    note: "镜筒按实物图与参数复原",
     bounds: [0.9, 1.78, 0.82],
     center: [0, 0.89, 0],
   });
@@ -1742,11 +1745,14 @@ function createNewtonianDisplay() {
   addAxialCylinder(group, 0.022, 0.022, 0.04, decCableEnd.toArray(), black, "z", 18);
   addAxialCylinder(group, 0.026, 0.026, 0.035, [0.12, 0.91, -0.105], black, "z", 20);
 
-  createEquipmentPlaque(group, "Sky-Watcher 150PDS", "EQ3 · 22° 极轴 · 零位", [0, 0.2, 0.42], 0.68);
+  createEquipmentPlaque(group, "小黑", "牛反 150/750 mm", [0, 0.2, 0.42], 0.68);
   registerEquipmentInteraction(group, {
-    title: "Sky-Watcher BK150PDS + EQ3",
-    details: ["抛物面牛顿反射式 · 150/750 mm · f/5", "镜筒 182 × 690 mm · 约 6 kg · 2 英寸双速调焦座", "EQ3 German equatorial mount：RA/DEC 蜗杆、双设置环、纬度调节与极轴镜座", "零位：镜筒平行极轴指向北天极，重锤杆沿 DEC 轴向下"],
-    note: "组合型号、镜筒尺寸和 EQ3 特征依据 Sky-Watcher 官方产品页；轴系按约 22° 纬度零位复原",
+    title: "小黑",
+    details: ["抛物面牛顿反射式 · 150/750 mm · f/5", "镜筒 182 × 690 mm · 约 6 kg · 2 英寸双速调焦座"],
+    note: "镜筒型号与尺寸依据 Sky-Watcher 官方产品页",
+    sources: [
+      ["Sky-Watcher 150PDS 官方产品页", "https://skywatcher.com/product/bkp-150-ds/"],
+    ],
     bounds: [0.96, 1.72, 0.92],
     center: [0, 0.86, 0],
   });
@@ -1958,6 +1964,9 @@ function populateDryCabinet(cabinet) {
     radius: 0.06,
     length: 0.115,
     details: ["彩色冷冻相机 · APS-C", "4952 × 3288 · 4.8 μm", "2 英寸接口 · 约 700 g"],
+    sources: [
+      ["QHY 官方停产产品页", "https://www.qhyccd.com/discontinued-products/"],
+    ],
   });
   const planetaryCameras = [
     [0.37, "QHY5III 462C", 0x3430a6, ["彩色行星相机", "1920 × 1080 · 2.9 μm · 135 fps", "1.25 英寸接口"]],
@@ -2031,6 +2040,7 @@ function createCooledCamera(parent, position, {
   radius,
   length,
   details,
+  sources,
 }) {
   const group = new THREE.Group();
   group.position.set(...position);
@@ -2054,6 +2064,7 @@ function createCooledCamera(parent, position, {
   registerEquipmentInteraction(group, {
     title,
     details,
+    sources,
     bounds: [radius * 2.5, length * 1.45, radius * 2.5],
     center: [0, length * 0.58, 0],
   });
@@ -2090,7 +2101,7 @@ function createEyepieceCollection(parent) {
     "Luminos 31 mm", "Luminos 15 mm", "Luminos 7 mm", "X-Cel LX 18 mm",
     "X-Cel LX 9 mm", "Celestron 18 mm", "Celestron 40 mm Plössl",
     "Celestron 28 mm", "Celestron 10 mm", "Coronado 25 mm",
-    "Coronado 18 mm", "Coronado 12 mm", "未知 28 mm", "SUPER 10",
+    "Coronado 18 mm", "Coronado 12 mm", "未标型号 28 mm", "SUPER 10",
   ];
   names.forEach((name, index) => {
     const x = index < 7 ? -1.18 + index * 0.17 : 0.16 + (index - 7) * 0.17;
@@ -2099,7 +2110,7 @@ function createEyepieceCollection(parent) {
     const radius = large ? 0.045 : 0.028;
     createEyepiece(group, x, 0, height, radius, index < 9 ? 0xf07a28 : 0xc0a24a, {
       title: name,
-      details: ["独立编目目镜", "接口规格按器材编目保留", name.includes("未知") ? "型号未标明，保留原目录名称" : "可单独取用与查看"],
+      details: ["独立编目目镜", "接口规格按器材编目保留", name.includes("未标型号") ? "型号未标明，保留原目录名称" : "可单独取用与查看"],
     });
   });
   for (const [x, label] of [[-0.64, "3× X-Cel"], [-0.31, "3× Barlow"], [0.55, "2× CEMAX"]]) {
@@ -2199,7 +2210,7 @@ function createBinocular(parent, position) {
   addBox(group, [0.09, 0.025, 0.07], [0, 0, 0.01], dark);
   registerEquipmentInteraction(group, {
     title: "米德双筒望远镜",
-    details: ["MEADE 双筒望远镜", "编目中口径、倍率与视场尚未确认", "按实物类别保留，不补写未知参数"],
+    details: ["MEADE 双筒望远镜", "编目中口径、倍率与视场尚未确认", "按实物类别保留，不补写未确认参数"],
     bounds: [0.18, 0.15, 0.22],
     center: [0, 0, 0],
   });
@@ -2834,7 +2845,7 @@ function openModal(interaction) {
     const equipmentInfo = document.createElement("div");
     equipmentInfo.className = "equipment-info";
     const intro = document.createElement("p");
-    intro.textContent = "点击器材模型可以查看编目中记录的主要参数。模型按真实比例制作，少数没有明确型号或尺寸的部件仅按实物照片复原外形。";
+    intro.textContent = "点击器材模型可以查看编目中记录的主要参数。";
     equipmentInfo.append(intro);
     const list = document.createElement("ul");
     (interaction.details || []).forEach((detail) => {
@@ -2843,6 +2854,21 @@ function openModal(interaction) {
       list.append(item);
     });
     equipmentInfo.append(list);
+    if (interaction.sources?.length) {
+      const sourceBlock = document.createElement("p");
+      sourceBlock.className = "equipment-sources";
+      sourceBlock.append("外部资料：");
+      interaction.sources.forEach(([label, url], index) => {
+        if (index > 0) sourceBlock.append(" · ");
+        const link = document.createElement("a");
+        link.href = url;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = label;
+        sourceBlock.append(link);
+      });
+      equipmentInfo.append(sourceBlock);
+    }
     modalContent.append(equipmentInfo);
   } else {
     const image = document.createElement("img");
