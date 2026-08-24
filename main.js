@@ -1048,10 +1048,10 @@ function createCustomPierTripod(parent) {
   const black = material(0x171b20, { metalness: 0.56, roughness: 0.34 });
   const dark = material(0x242a30, { metalness: 0.48, roughness: 0.4 });
   const white = material(0xe8e7e1, { metalness: 0.28, roughness: 0.38 });
-  const chrome = material(0xc9ced0, { metalness: 0.92, roughness: 0.13 });
+  const silverMetal = material(0xc9ced0, { metalness: 0.92, roughness: 0.13 });
   const rubber = material(0x111519, { metalness: 0.08, roughness: 0.82 });
 
-  // 三张实物照的共同结构：中央 pier、白色开槽上腿、镀铬伸缩下腿和三向撑杆。
+  // 三张实物照的共同结构：中央 pier、白色开槽上腿、银色金属伸缩下腿和三向撑杆。
   // 柱底端保持在原处（底面约 26 cm），向上增加 20 cm；脚端因此完全不动。
   addCylinder(parent, 0.112, 0.112, 0.84, [0, 0.68, 0], black, 18);
   // 柱底端的固定抱箍；三脚架的腿部抱箍位于其上方。
@@ -1059,7 +1059,7 @@ function createCustomPierTripod(parent) {
   addCylinder(parent, 0.145, 0.145, 0.055, [0, 0.563, 0], dark, 24);
   addCylinder(parent, 0.132, 0.132, 0.075, [0, 0.985, 0], dark, 24);
   addCylinder(parent, 0.122, 0.122, 0.055, [0, 1.045, 0], black, 24);
-  addBox(parent, [0.235, 0.032, 0.235], [0, 1.082, 0], chrome);
+  addBox(parent, [0.235, 0.032, 0.235], [0, 1.082, 0], silverMetal);
 
   for (const y of [0.39, 0.60, 0.81]) {
     for (const angle of [0, Math.PI / 2]) {
@@ -1091,7 +1091,7 @@ function createCustomPierTripod(parent) {
     const slotEnd = new THREE.Vector3(...hub).addScaledVector(upperVector, 0.78);
     addBoxBetween(parent, slotStart.toArray(), slotEnd.toArray(), 0.021, 0.058, dark);
 
-    addCylinderBetween(parent, knee, foot, 0.023, chrome, 18);
+    addCylinderBetween(parent, knee, foot, 0.023, silverMetal, 18);
     addCylinderBetween(parent, radial(0.305, 0.270), radial(0.375, 0.215), 0.034, dark, 18);
     // 从柱底端抱箍连接到每只脚中部旋钮：暗色细方柱，而不是圆杆。
     addBoxBetween(parent, radial(0.115, 0.275), radial(0.335, 0.270), 0.018, 0.018, dark);
@@ -1310,7 +1310,7 @@ function createCem40RefractorStationLegacy() {
   createEquipmentPlaque(group, "锐星 CF-90 II", "搭配 iOptron CEM40");
   registerEquipmentInteraction(group, {
     title: "锐星 CF-90 II APO + iOptron CEM40",
-    details: ["折射式 APO · 口径 90 mm · 焦距 600 mm · f/6.7", "2 英寸接口 · 镜筒约 3.20 kg", "CEM40：125 mm 底座、中心平衡赤道仪、承载 18 kg", "定制 pier tripod：黑色中央立柱、白色开槽上腿、镀铬伸缩下腿"],
+    details: ["折射式 APO · 口径 90 mm · 焦距 600 mm · f/6.7", "2 英寸接口 · 镜筒约 3.20 kg", "CEM40：125 mm 底座、中心平衡赤道仪、承载 18 kg", "定制 pier tripod：黑色中央立柱、白色开槽上腿、银色金属伸缩下腿"],
     note: "镜筒与赤道仪参数依据器材编目；定制脚架尺寸依据三张实物照片按比例复原",
     bounds: [1.46, 1.9, 1.25],
     center: [0, 0.95, 0.08],
@@ -1439,7 +1439,7 @@ function createCem40RefractorStation() {
   createEquipmentPlaque(group, "锐星 CF-90 II", "CEM40 · 22° 极轴 · 零位", [0, 0.2, 0.45], 0.68);
   registerEquipmentInteraction(group, {
     title: "锐星 CF-90 II APO + iOptron CEM40",
-    details: ["折射式 APO · 口径 90 mm · 焦距 600 mm · f/6.7", "CEM40 中心平衡结构；极轴仰角设为珠海纬度约 22°", "零位：镜筒在上并平行极轴指向北天极，重锤杆沿 DEC 轴向下", "定制 pier tripod：黑色中央立柱、白色开槽上腿、镀铬伸缩下腿"],
+    details: ["折射式 APO · 口径 90 mm · 焦距 600 mm · f/6.7", "CEM40 中心平衡结构；极轴仰角设为珠海纬度约 22°", "零位：镜筒在上并平行极轴指向北天极，重锤杆沿 DEC 轴向下", "定制 pier tripod：黑色中央立柱、白色开槽上腿、银色金属伸缩下腿"],
     note: "轴系与零位依据 iOptron CEM40 官方 Quick Start Guide；镜筒参数依据社团器材编目",
     bounds: [1.48, 1.9, 1.28],
     center: [0, 0.96, 0],
