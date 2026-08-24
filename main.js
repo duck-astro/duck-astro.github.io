@@ -425,11 +425,11 @@ function makeWallControlTexture(kind) {
 function buildWallControls(textures) {
   const housingMaterial = material(0xf2f1eb, { roughness: 0.72 });
   const controls = [
-    { kind: "switch", x: 0.69, title: "活动室灯光开关", details: ["Schneider Electric 墙面开关", "面板约 10 × 10 cm", "面板贴有《K-ON!》平泽唯贴纸"] },
-    { kind: "thermostat", x: 0.575, title: "空调控制器", details: ["GREE 格力墙面控制器", "面板约 10 × 10 cm", "显示温度 26.0 °C"] },
+    { kind: "switch", x: 0.69 },
+    { kind: "thermostat", x: 0.575 },
   ];
 
-  controls.forEach(({ kind, x, title, details }) => {
+  controls.forEach(({ kind, x }) => {
     const control = new THREE.Group();
     control.position.set(x, 1.18, 1.957);
     scene.add(control);
@@ -445,15 +445,6 @@ function buildWallControls(textures) {
     );
     face.position.z = -0.011;
     face.rotation.y = Math.PI;
-    face.userData.interaction = {
-      kind: "info",
-      label: `查看「${title}」`,
-      kicker: "门侧墙面",
-      title,
-      details,
-      note: "依据活动室实物照片复原",
-    };
-    interactables.push(face);
     control.add(face);
 
     if (kind === "switch") {
@@ -470,8 +461,6 @@ function buildWallControls(textures) {
       sticker.position.set(-0.004, 0, -0.0123);
       sticker.rotation.y = Math.PI;
       sticker.renderOrder = 8;
-      sticker.userData.interaction = face.userData.interaction;
-      interactables.push(sticker);
       control.add(sticker);
     }
   });
@@ -2474,8 +2463,8 @@ function buildPosters(textures) {
     position: [-0.76, 2.25, 1.966],
     rotationY: Math.PI,
     title: "七峰山背影",
-    kicker: "观测活动照片",
-    note: "七峰山观测活动中的星空与社员背影",
+    kicker: "",
+    note: "",
     source: assetUrl("qifeng-night.webp"),
     framed: false,
   });
@@ -2911,7 +2900,7 @@ function activateAt(clientX, clientY) {
 }
 
 function openModal(interaction) {
-  modalKicker.textContent = interaction.kicker || (interaction.kind === "pdf" ? "活动室藏书" : "活动室墙面");
+  modalKicker.textContent = interaction.kicker ?? (interaction.kind === "pdf" ? "活动室藏书" : "活动室墙面");
   modalTitle.textContent = interaction.title;
   modalNote.textContent = interaction.note || "";
   modalOpen.hidden = interaction.kind === "info";
