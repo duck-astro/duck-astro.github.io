@@ -61,6 +61,8 @@ let pointerStartX = 0;
 let pointerStartY = 0;
 let hintTimer;
 let freeRoaming = false;
+let roomLights = [];
+let roomLightsOn = true;
 
 const movementKeys = new Set();
 const movementForward = new THREE.Vector3();
@@ -234,8 +236,10 @@ async function loadTextures() {
 }
 
 function buildLights() {
+  roomLights = [];
   const hemisphere = new THREE.HemisphereLight(0xf8fbff, 0x9ca4ad, 1.55);
   scene.add(hemisphere);
+  roomLights.push({ light: hemisphere, intensity: hemisphere.intensity });
 
   const daylight = new THREE.DirectionalLight(0xd8e8ff, 1.25);
   daylight.position.set(1.1, 2.5, -2.3);
@@ -250,6 +254,7 @@ function buildLights() {
   daylight.shadow.camera.far = 8;
   daylight.shadow.bias = -0.00025;
   scene.add(daylight, daylight.target);
+  roomLights.push({ light: daylight, intensity: daylight.intensity });
 
   const panelPositions = [
     [-0.65, -0.55],
@@ -263,6 +268,7 @@ function buildLights() {
     panelLight.position.set(x, 2.91, z);
     panelLight.rotation.x = -Math.PI / 2;
     scene.add(panelLight);
+    roomLights.push({ light: panelLight, intensity: panelLight.intensity });
   }
 }
 
@@ -445,6 +451,13 @@ function buildWallControls(textures) {
     );
     face.position.z = -0.011;
     face.rotation.y = Math.PI;
+    if (kind === "switch") {
+      face.userData.interaction = {
+        kind: "light-switch",
+        label: "关灯",
+      };
+      interactables.push(face);
+    }
     control.add(face);
 
     if (kind === "switch") {
@@ -461,6 +474,8 @@ function buildWallControls(textures) {
       sticker.position.set(-0.004, 0, -0.0123);
       sticker.rotation.y = Math.PI;
       sticker.renderOrder = 8;
+      sticker.userData.interaction = face.userData.interaction;
+      interactables.push(sticker);
       control.add(sticker);
     }
   });
@@ -2893,6 +2908,17 @@ function activateAt(clientX, clientY) {
       part.userData.interaction.label = isOpen ? `合上${sideName}` : `打开${sideName}`;
     });
     showTransientHint(`${cabinetIndex === 0 ? "左侧" : "右侧"}防潮柜已经${isOpen ? "打开" : "合上"}`, 1500);
+    clearHover();
+    return;
+  }
+  if (interaction.kind === "light-switch") {
+    roomLightsOn = !roomLightsOn;
+    const factor = roomLightsOn ? 1 : 0.1;
+    roomLights.forEach(({ light, intensity }) => {
+      light.intensity = intensity * factor;
+    });
+    interaction.label = roomLightsOn ? "关灯" : "开灯";
+    showTransientHint(roomLightsOn ? "灯已打开" : "灯已关闭", 1500);
     clearHover();
     return;
   }
