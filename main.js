@@ -106,7 +106,7 @@ const tourStops = [
   },
   {
     name: "木柜",
-    description: "打开柜门，看看相框与两本周年社刊",
+    description: "打开柜门，看看相框与中层三本书",
     position: new THREE.Vector3(0.18, 1.43, -1.2),
     target: new THREE.Vector3(-1.55, 1.12, -1.25),
   },
@@ -203,7 +203,6 @@ async function loadTextures() {
   const loader = new THREE.TextureLoader(manager);
   const files = {
     flag: "club-flag.webp",
-    poster: "yaya-telescope-poster.webp",
     qifeng: "qifeng-night.webp",
     silhouette: "club-silhouette.webp",
     recruitmentQa: "recruitment-qa.webp",
@@ -211,6 +210,9 @@ async function loadTextures() {
     koiasFrame: "koias-frame.webp",
     journal10: "journal-10-cover.webp",
     journal20: "journal-20-cover.webp",
+    starOcean: "star-ocean-cover.webp",
+    takahashiPoster: "takahashi-poster.webp",
+    coronadoPoster: "coronado-poster.webp",
   };
 
   manager.onProgress = (_url, loaded, total) => {
@@ -330,6 +332,7 @@ function buildRoom(textures) {
 
   buildDoor();
   buildWallControls(textures);
+  buildWallOutlets();
   buildWindowAndCurtain();
 }
 
@@ -472,6 +475,56 @@ function buildWallControls(textures) {
       control.add(sticker);
     }
   });
+}
+
+function buildWallOutlets() {
+  const housingMaterial = material(0xf2f1eb, { roughness: 0.72 });
+  const faceMaterial = new THREE.MeshBasicMaterial({ map: makeWallSocketTexture(), side: THREE.DoubleSide });
+  for (const x of [-0.98, -0.72]) {
+    const outlet = new THREE.Group();
+    outlet.position.set(x, 0.2, 1.957);
+    scene.add(outlet);
+    const housing = new THREE.Mesh(createRoundedBoxGeometry(0.1, 0.018, 0.1, 0.012), housingMaterial);
+    housing.rotation.x = Math.PI / 2;
+    housing.castShadow = true;
+    outlet.add(housing);
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(0.092, 0.092), faceMaterial);
+    face.position.z = -0.011;
+    face.rotation.y = Math.PI;
+    face.userData.interaction = {
+      kind: "info",
+      label: "查看国标插座",
+      kicker: "门侧墙面",
+      title: "国标插座",
+      details: ["墙面双孔插座", "面板约 10 × 10 cm", "安装位置离地约 20 cm"],
+      note: "按活动室墙面布置要求复原",
+    };
+    interactables.push(face);
+    outlet.add(face);
+  }
+}
+
+function makeWallSocketTexture() {
+  const socketCanvas = document.createElement("canvas");
+  socketCanvas.width = 512;
+  socketCanvas.height = 512;
+  const ctx = socketCanvas.getContext("2d");
+  ctx.fillStyle = "#f4f3ed";
+  ctx.fillRect(0, 0, 512, 512);
+  ctx.strokeStyle = "#d2d0c8";
+  ctx.lineWidth = 10;
+  ctx.strokeRect(8, 8, 496, 496);
+  ctx.fillStyle = "#4f555b";
+  for (const [x, y] of [[190, 205], [322, 205], [190, 320], [322, 320]]) {
+    ctx.beginPath();
+    ctx.arc(x, y, 24, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = "#f4f3ed";
+  ctx.beginPath();
+  ctx.arc(256, 262, 10, 0, Math.PI * 2);
+  ctx.fill();
+  return new THREE.CanvasTexture(socketCanvas);
 }
 
 function buildWindowAndCurtain() {
@@ -749,25 +802,41 @@ function buildCabinetContents(textures) {
 
   createDisplayBook({
     texture: textures.journal10,
-    position: [-1.415, 1.04, -1.48],
+    position: [-1.415, 0.98, -1.54],
     color: 0xf2f0e8,
     title: "天文学社十周年社刊",
     source: "journal-10-cover.webp",
+    width: 0.25,
+    height: 0.355,
+    thickness: 0.01,
   });
   createDisplayBook({
     texture: textures.journal20,
-    position: [-1.415, 1.04, -1.08],
+    position: [-1.415, 0.995, -1.25],
     color: 0xdce8ee,
     title: "天文学社二十周年社刊",
     source: "journal-20-cover.webp",
+    width: 0.297,
+    height: 0.42,
+    thickness: 0.03,
+  });
+  createDisplayBook({
+    texture: textures.starOcean,
+    position: [-1.415, 0.995, -0.95],
+    color: 0xf2f0e8,
+    title: "星辰大海那些事",
+    source: "star-ocean-cover.webp",
+    width: 0.297,
+    height: 0.42,
+    thickness: 0.03,
   });
 }
 
-function createDisplayBook({ texture, position, color, title, source }) {
+function createDisplayBook({ texture, position, color, title, source, width = 0.29, height = 0.42, thickness = 0.03 }) {
   const edge = material(color, { roughness: 0.8 });
   const paper = material(0xeee9dc, { roughness: 0.92 });
   const cover = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.68 });
-  const geometry = new THREE.BoxGeometry(0.035, 0.42, 0.29);
+  const geometry = new THREE.BoxGeometry(thickness, height, width);
   const mesh = new THREE.Mesh(geometry, [cover, edge, paper, paper, edge, edge]);
   mesh.position.set(...position);
   mesh.castShadow = true;
@@ -2387,25 +2456,13 @@ function createStorageShelf(parent) {
 
 function buildPosters(textures) {
   createPoster({
-    texture: textures.poster,
-    width: 0.8,
-    height: 0.533,
-    position: [0.17, 2.25, 1.966],
-    rotationY: Math.PI,
-    title: "Yaya Telescope Poster",
-    kicker: "活动室海报",
-    note: "中山大学天文学社望远镜主题海报",
-    source: assetUrl("yaya-telescope-poster.webp"),
-  });
-
-  createPoster({
     texture: textures.flag,
     width: 0.72,
     height: 0.54,
-    position: [-0.76, 1.38, 1.966],
+    position: [0.17, 2.25, 1.966],
     rotationY: Math.PI,
     title: "新社旗",
-    kicker: "活动室照片",
+    kicker: "活动室海报",
     note: "摄于 2023-09-17 珠海校区社团联合游园会",
     source: assetUrl("club-flag.webp"),
   });
@@ -2420,14 +2477,39 @@ function buildPosters(textures) {
     kicker: "观测活动照片",
     note: "七峰山观测活动中的星空与社员背影",
     source: assetUrl("qifeng-night.webp"),
+    framed: false,
+  });
+
+  createPoster({
+    texture: textures.takahashiPoster,
+    width: 0.78,
+    height: 1.758,
+    position: [9.966, 1.48, -1.12],
+    rotationY: -Math.PI / 2,
+    title: "高桥 TOA-130NF 观测器材科普",
+    kicker: "望远镜展报",
+    note: "高桥 TOA-130NF 观测器材科普海报（最新版）",
+    source: assetUrl("takahashi-poster.webp"),
+  });
+
+  createPoster({
+    texture: textures.coronadoPoster,
+    width: 0.78,
+    height: 1.758,
+    position: [9.966, 1.48, 0.18],
+    rotationY: -Math.PI / 2,
+    title: "Coronado SolarMax II 90 观测器材科普",
+    kicker: "望远镜展报",
+    note: "Coronado SolarMax II 90 观测器材科普海报（最新版）",
+    source: assetUrl("coronado-poster.webp"),
   });
 
   createPoster({
     texture: textures.silhouette,
     width: 0.98,
     height: 1.386,
-    position: [9.966, 1.55, -1.12],
-    rotationY: -Math.PI / 2,
+    position: [2.8, 1.52, 1.966],
+    rotationY: Math.PI,
     title: "天文学社剪影",
     kicker: "招新海报",
     note: "天文学社活动剪影（2023）",
@@ -2436,10 +2518,10 @@ function buildPosters(textures) {
 
   createPoster({
     texture: textures.recruitmentQa,
-    width: 0.98,
-    height: 1.386,
-    position: [9.966, 1.55, 0.18],
-    rotationY: -Math.PI / 2,
+    width: 0.82,
+    height: 1.159,
+    position: [4.05, 1.48, 1.966],
+    rotationY: Math.PI,
     title: "天文学社招新 Q&A",
     kicker: "招新海报",
     note: "天文学社招新 Q&A（2023）",
@@ -2447,15 +2529,17 @@ function buildPosters(textures) {
   });
 }
 
-function createPoster({ texture, width, height, position, rotationY, title, kicker, note, source }) {
+function createPoster({ texture, width, height, position, rotationY, title, kicker, note, source, framed = true }) {
   const frameMaterial = material(0x2a313a, { roughness: 0.58 });
   const posterPosition = new THREE.Vector3(...position);
   const normal = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationY);
-  const framePosition = posterPosition.clone().addScaledVector(normal, -0.029);
-  const frameSize = Math.abs(normal.x) > 0.5
-    ? [0.045, height + 0.08, width + 0.08]
-    : [width + 0.08, height + 0.08, 0.045];
-  addBox(scene, frameSize, framePosition.toArray(), frameMaterial);
+  if (framed) {
+    const framePosition = posterPosition.clone().addScaledVector(normal, -0.029);
+    const frameSize = Math.abs(normal.x) > 0.5
+      ? [0.045, height + 0.08, width + 0.08]
+      : [width + 0.08, height + 0.08, 0.045];
+    addBox(scene, frameSize, framePosition.toArray(), frameMaterial);
+  }
 
   const poster = new THREE.Mesh(
     new THREE.PlaneGeometry(width, height),
