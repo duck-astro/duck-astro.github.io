@@ -469,7 +469,7 @@ function buildWallControls(textures) {
 function buildWallOutlets() {
   const housingMaterial = material(0xf2f1eb, { roughness: 0.72 });
   const faceMaterial = new THREE.MeshBasicMaterial({ map: makeWallSocketTexture(), side: THREE.DoubleSide });
-  for (const x of [-0.98, -0.72]) {
+  for (const x of [-0.95, -0.85]) {
     const outlet = new THREE.Group();
     outlet.position.set(x, 0.2, 1.957);
     scene.add(outlet);
@@ -480,15 +480,6 @@ function buildWallOutlets() {
     const face = new THREE.Mesh(new THREE.PlaneGeometry(0.092, 0.092), faceMaterial);
     face.position.z = -0.011;
     face.rotation.y = Math.PI;
-    face.userData.interaction = {
-      kind: "info",
-      label: "查看国标插座",
-      kicker: "门侧墙面",
-      title: "国标插座",
-      details: ["墙面双孔插座", "面板约 10 × 10 cm", "安装位置离地约 20 cm"],
-      note: "按活动室墙面布置要求复原",
-    };
-    interactables.push(face);
     outlet.add(face);
   }
 }
@@ -504,15 +495,23 @@ function makeWallSocketTexture() {
   ctx.lineWidth = 10;
   ctx.strokeRect(8, 8, 496, 496);
   ctx.fillStyle = "#4f555b";
-  for (const [x, y] of [[190, 205], [322, 205], [190, 320], [322, 320]]) {
+  const drawSlot = (x, y, width, height, angle = 0) => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
     ctx.beginPath();
-    ctx.arc(x, y, 24, 0, Math.PI * 2);
+    ctx.roundRect(-width / 2, -height / 2, width, height, Math.min(width, height) / 2);
     ctx.fill();
-  }
-  ctx.fillStyle = "#f4f3ed";
+    ctx.restore();
+  };
+  // 上方三脚插孔：两条斜槽加中央接地孔；下方二脚插孔：两条平行插槽。
+  drawSlot(214, 185, 22, 66, -0.18);
+  drawSlot(298, 185, 22, 66, 0.18);
   ctx.beginPath();
-  ctx.arc(256, 262, 10, 0, Math.PI * 2);
+  ctx.arc(256, 262, 14, 0, Math.PI * 2);
   ctx.fill();
+  drawSlot(224, 356, 22, 72);
+  drawSlot(288, 356, 22, 72);
   return new THREE.CanvasTexture(socketCanvas);
 }
 
@@ -1682,9 +1681,9 @@ function createNewtonianDisplayLegacy() {
   addAxialCylinder(tubeAssembly, 0.025, 0.029, 0.08, [0.16, tubeY + 0.18, 0], black, "y", 20);
   addAxialCylinder(tubeAssembly, 0.017, 0.017, 0.15, [-0.08, tubeY + 0.14, 0], white, "x", 18);
   addBox(tubeAssembly, [0.15, 0.018, 0.025], [-0.08, tubeY + 0.11, 0], white);
-  createEquipmentPlaque(group, "小黑", "牛反 150/750 mm", [0, 0.18, 0.34], 0.66);
+  createEquipmentPlaque(group, "信达小黑", "牛反 150/750 mm", [0, 0.18, 0.34], 0.66);
   registerEquipmentInteraction(group, {
-    title: "小黑",
+    title: "信达小黑",
     details: ["抛物面牛顿反射式", "口径 150 mm · 焦距 750 mm · f/5", "镜筒 182 × 690 mm · 约 6 kg · 2 英寸双速调焦座"],
     note: "镜筒按实物图与参数复原",
     bounds: [0.9, 1.78, 0.82],
@@ -1786,7 +1785,8 @@ function createNewtonianDisplay() {
     ring.position.x = tubeX;
     tubeAssembly.add(ring);
   }
-  addBox(tubeAssembly, [0.48, 0.035, 0.075], [0, -0.13, 0], green);
+  // 鸠尾板位于镜筒底部，朝下连接赤道仪鞍座。
+  addBox(tubeAssembly, [0.48, 0.035, 0.075], [0, 0.13, 0], green);
   addAxialCylinder(tubeAssembly, 0.034, 0.034, 0.095, [0.18, 0.108, 0], white, "y", 22);
   addAxialCylinder(tubeAssembly, 0.025, 0.029, 0.08, [0.18, 0.18, 0], black, "y", 22);
   addAxialCylinder(tubeAssembly, 0.017, 0.017, 0.15, [-0.08, 0.14, 0], white, "x", 18);
@@ -1803,9 +1803,9 @@ function createNewtonianDisplay() {
   addAxialCylinder(group, 0.022, 0.022, 0.04, decCableEnd.toArray(), black, "z", 18);
   addAxialCylinder(group, 0.026, 0.026, 0.035, [0.12, 0.91, -0.105], black, "z", 20);
 
-  createEquipmentPlaque(group, "小黑", "牛反 150/750 mm", [0, 0.2, 0.42], 0.68);
+  createEquipmentPlaque(group, "信达小黑", "牛反 150/750 mm", [0, 0.2, 0.42], 0.68);
   registerEquipmentInteraction(group, {
-    title: "小黑",
+    title: "信达小黑",
     details: ["抛物面牛顿反射式 · 150/750 mm · f/5", "镜筒 182 × 690 mm · 约 6 kg · 2 英寸双速调焦座"],
     note: "镜筒型号与尺寸依据 Sky-Watcher 官方产品页",
     sources: [
